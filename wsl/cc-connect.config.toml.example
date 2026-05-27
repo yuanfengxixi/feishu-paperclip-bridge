@@ -1,0 +1,24 @@
+# Install at: ~/.cc-connect/config.toml
+# This drives a SINGLE Feishu bot connected to a SINGLE work directory.
+# For multiple bots/projects, see windows/cc-connect.config.toml.example
+# (the [[projects]] table is repeatable).
+
+language = "zh"
+
+[[projects]]
+name = "your-project-name"   # internal label, shows in cc-connect logs
+
+[projects.agent]
+type = "claudecode"          # or "codex_local" — whatever your cc-connect supports
+
+[projects.agent.options]
+work_dir = "/home/yourname/work/your-project"   # absolute path; cwd for the agent
+mode = "bypassPermissions"                       # claude-code's --dangerously-skip-permissions
+
+[[projects.platforms]]
+type = "feishu"
+
+[projects.platforms.options]
+# Get these from open.feishu.cn → 应用管理 → your bot → 凭证与基础信息
+app_id     = "REPLACE_WITH_YOUR_FEISHU_APP_ID"      # looks like cli_xxxxxxxxxxxxxxxx
+app_secret = "REPLACE_WITH_YOUR_FEISHU_APP_SECRET"  # rotate this if it ever leaks

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Install at: ~/.local/bin/claude  (chmod +x)
+#
+# Purpose: inject HTTPS_PROXY only for the `claude` subprocess.
+# Why: Anthropic API is geo-blocked from Chinese direct IPs, so claude needs
+# Clash/FlClash proxy. But its parent (cc-connect) calls Feishu, which is
+# China-hosted and BLOCKED by overseas proxy nodes.
+# Solution: parent runs with proxy UNSET, this wrapper re-adds proxy before
+# exec'ing the real claude binary.
+#
+# Adjust the proxy URL + real-claude path to match your install.
+
+export HTTPS_PROXY="http://127.0.0.1:7890"
+export HTTP_PROXY="http://127.0.0.1:7890"
+export https_proxy="http://127.0.0.1:7890"
+export http_proxy="http://127.0.0.1:7890"
+
+# Real claude binary path. Use `which -a claude` to find yours.
+# For nvm installs:    ~/.nvm/versions/node/v20.x.x/bin/claude
+# For global npm:      /usr/local/lib/node_modules/@anthropic-ai/claude-code/bin/claude.js
+REAL_CLAUDE="${REAL_CLAUDE:-$HOME/.nvm/versions/node/v20.20.2/bin/claude}"
+
+if [ ! -x "$REAL_CLAUDE" ]; then
+  echo "claude-wrapper: REAL_CLAUDE not executable: $REAL_CLAUDE" >&2
+  echo "Set REAL_CLAUDE env var or edit this wrapper." >&2
+  exit 127
+fi
+
+exec "$REAL_CLAUDE" "$@"

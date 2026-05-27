@@ -1,0 +1,25 @@
+# Never commit real secrets — the *.example files are the only templates that ship
+*.local
+*.local.toml
+*.local.sh
+.env
+.env.*
+!.env.example
+
+# Logs / runtime
+*.log
+.cache/
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# WSL paths that should never be committed
+sessions/
+cookies/

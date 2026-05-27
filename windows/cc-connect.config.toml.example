@@ -1,0 +1,73 @@
+# Install at: C:\Users\<you>\.cc-connect\config.toml
+# Multi-project / multi-bot example — three independent Feishu apps each
+# pointed at a different Windows work directory.
+
+attachment_send = "on"
+language = "zh"
+
+# ─── Project 1: catch-all default ───────────────────────────────────────────
+[[projects]]
+name                 = "default"
+admin_from           = "*"
+reset_on_idle_mins   = 0
+
+[projects.agent]
+type = "claudecode"
+
+[projects.agent.options]
+work_dir = "C:\\Users\\YourName"   # cwd for this bot's claude sessions
+model    = "opus"                  # override default model; omit to use cc-connect default
+
+[[projects.platforms]]
+type = "feishu"
+
+[projects.platforms.options]
+app_id              = "REPLACE_WITH_BOT_1_APP_ID"
+app_secret          = "REPLACE_WITH_BOT_1_APP_SECRET"
+enable_feishu_card  = true
+thread_isolation    = false
+progress_style      = "card"
+
+# ─── Project 2: knowledge base / notes ──────────────────────────────────────
+[[projects]]
+name                 = "knowledge-base"
+admin_from           = "*"
+reset_on_idle_mins   = 0
+
+[projects.agent]
+type = "claudecode"
+
+[projects.agent.options]
+work_dir = "D:\\notes"
+
+[[projects.platforms]]
+type = "feishu"
+
+[projects.platforms.options]
+app_id              = "REPLACE_WITH_BOT_2_APP_ID"
+app_secret          = "REPLACE_WITH_BOT_2_APP_SECRET"
+enable_feishu_card  = true
+thread_isolation    = false
+progress_style      = "card"
+
+# ─── Project 3: design / orders ─────────────────────────────────────────────
+[[projects]]
+name                 = "design-orders"
+admin_from           = "*"
+reset_on_idle_mins   = 0
+
+[projects.agent]
+type = "claudecode"
+
+[projects.agent.options]
+work_dir = "D:\\design"
+
+[[projects.platforms]]
+type = "feishu"
+
+[projects.platforms.options]
+app_id              = "REPLACE_WITH_BOT_3_APP_ID"
+app_secret          = "REPLACE_WITH_BOT_3_APP_SECRET"
+enable_feishu_card  = true
+thread_isolation    = false
+progress_style      = "card"
