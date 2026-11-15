@@ -16,10 +16,28 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 export PATH="$HOME/.local/bin:$PATH"
 
-# Paperclip needs a stable JWT secret to sign agent run tokens.
-# Generate once: openssl rand -hex 32
-# Store in $HOME/.paperclip.env (gitignored) and source here, OR replace inline:
-PAPERCLIP_AGENT_JWT_SECRET="${PAPERCLIP_AGENT_JWT_SECRET:-REPLACE_WITH_OPENSSL_RAND_HEX_32}"
+# Paperclip needs a stable JWT secret to sign agent run tokens. Keep it in
+# ~/.paperclip.env and source it only inside the Paperclip tmux pane. Do not
+# interpolate the value into a tmux command: command arguments can be visible
+# in process listings and the tmux server environment.
+PAPERCLIP_ENV_FILE="$HOME/.paperclip.env"
+if [ ! -r "$PAPERCLIP_ENV_FILE" ]; then
+  echo "Missing $PAPERCLIP_ENV_FILE. See docs/setup.md for secure setup." >&2
+  exit 1
+fi
+if ! (
+  set -a
+  . "$PAPERCLIP_ENV_FILE"
+  [ -n "${PAPERCLIP_AGENT_JWT_SECRET:-}" ]
+); then
+  echo "$PAPERCLIP_ENV_FILE must define a non-empty PAPERCLIP_AGENT_JWT_SECRET." >&2
+  exit 1
+fi
+# A user may also have sourced ~/.paperclip.env in their shell. Do not pass
+# that inherited secret into the tmux client/server environment.
+unset PAPERCLIP_AGENT_JWT_SECRET
+# Remove a server-global copy inherited by an older launch of this script.
+tmux set-environment -gu PAPERCLIP_AGENT_JWT_SECRET 2>/dev/null || true
 
 start() {  # $1=session name  $2=command
   if tmux has-session -t "=$1" 2>/dev/null; then
@@ -30,7 +48,8 @@ start() {  # $1=session name  $2=command
   fi
 }
 
-start paperclip      "cd \$HOME/work/paperclip && export NVM_DIR=\$HOME/.nvm && . \$NVM_DIR/nvm.sh && export PAPERCLIP_AGENT_JWT_SECRET=$PAPERCLIP_AGENT_JWT_SECRET && pnpm dev 2>&1 | tee \$HOME/paperclip.log"
+paperclip_cmd='cd "$HOME/work/paperclip" && export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" && set -a && . "$HOME/.paperclip.env" && set +a && : "${PAPERCLIP_AGENT_JWT_SECRET:?Missing from ~/.paperclip.env}" && pnpm dev 2>&1 | tee "$HOME/paperclip.log"'
+start paperclip "$paperclip_cmd"
 start paperclip-mcp  "cd \$HOME/work/paperclip-mcp && export NVM_DIR=\$HOME/.nvm && . \$NVM_DIR/nvm.sh && export PATH=\$HOME/.local/bin:\$PATH && source venv/bin/activate && paperclip-mcp 2>&1 | tee \$HOME/paperclip-mcp.log"
 
 # cc-connect: CRITICAL — unset all proxy env vars before launch.

@@ -14,6 +14,8 @@ feishu-paperclip-bridge/
 │                              # static routes, hosts pinning, claude proxy wrapper
 ├── windows/                   # Windows side: multi-bot cc-connect config,
 │                              # persistent route script
+├── tests/                     # offline launch and TOML example checks
+├── .github/workflows/         # script/config validation on PRs and main pushes
 └── docs/
     ├── architecture.md        # how the pieces fit together
     ├── pitfalls.md            # every trap I hit (read this first)
@@ -39,6 +41,18 @@ Two pain points solved:
 2. **Anthropic API is geo-blocked from China direct IPs, but cc-connect → Feishu is geo-blocked from overseas proxies.** Same `claude` binary needs `HTTPS_PROXY` set, but its parent (cc-connect) needs proxy *unset*. Solution: a per-process wrapper at `~/.local/bin/claude`.
 
 The hard parts are in [docs/pitfalls.md](docs/pitfalls.md).
+
+## Validate locally
+
+These checks do not change network routes or start Paperclip services:
+
+```bash
+bash -n wsl/feishu-routes.sh wsl/start-all.sh wsl/claude-wrapper
+bash tests/test_start_all_secret.sh
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+```
+
+The Python examples use the standard-library TOML parser on Python 3.11+. On older Python versions, install `tests/requirements.txt` first. GitHub Actions also parses the PowerShell route script without executing it.
 
 ## Status
 

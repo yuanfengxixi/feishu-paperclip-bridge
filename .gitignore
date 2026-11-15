@@ -5,6 +5,7 @@
 .env
 .env.*
 !.env.example
+.paperclip.env
 
 # Logs / runtime
 *.log
