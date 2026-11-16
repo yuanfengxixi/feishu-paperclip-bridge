@@ -49,7 +49,7 @@ sudo chmod +x /usr/local/sbin/feishu-routes.sh
 sudo cp wsl/wsl.conf /etc/wsl.conf
 # Edit /etc/wsl.conf — set [user] default to your username
 # Edit ~/.cc-connect/config.toml — fill in app_id / app_secret / work_dir
-# Edit ~/start-all.sh — set PAPERCLIP_AGENT_JWT_SECRET (or read from env file)
+# Keep the JWT secret in ~/.paperclip.env as shown in Step 5; do not put it in the script.
 ```
 
 ## Step 4 — verify the routes work
@@ -79,9 +79,9 @@ curl -s -o /dev/null -w '%{http_code}\n' https://open.feishu.cn
 ## Step 5 — generate paperclip JWT secret + start
 
 ```bash
-echo "export PAPERCLIP_AGENT_JWT_SECRET=$(openssl rand -hex 32)" >> ~/.paperclip.env
-echo 'source ~/.paperclip.env' >> ~/.bashrc
-source ~/.paperclip.env
+umask 077
+printf 'export PAPERCLIP_AGENT_JWT_SECRET=%s\n' "$(openssl rand -hex 32)" > ~/.paperclip.env
+chmod 600 ~/.paperclip.env
 
 ~/start-all.sh
 # tmux ls should show: paperclip, paperclip-mcp, cc-connect
